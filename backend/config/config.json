@@ -1,0 +1,21 @@
+{
+    "provider": "MT5",
+    "symbols": [
+        "AAL",
+        "AMD",
+        "AMZN",
+        "BAC",
+        "COST",
+        "F",
+        "INTC",
+        "META",
+        "NVDA",
+        "SOFI"
+    ],
+    "strategy": "rsi_cross_trend",
+    "timeframes": {
+        "trend": "M15",
+        "entry": "M5"
+    },
+    "execution_interval": 60
+}

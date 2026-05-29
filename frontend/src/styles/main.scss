@@ -1,0 +1,66 @@
+@import './variables';
+@import './layout';
+
+.container {
+  padding: 0 30px 30px;
+}
+
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  margin-top: 20px;
+  
+  @include desktop {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
+  .wrapper-tables {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
+  }
+}
+
+.toast-container {
+  position: fixed;
+  right: 30px;
+  top: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 20px;
+}
+
+.alert-toast {
+  background-color: $panel;
+  color: $text-color;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  animation: fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.alert-toast.error {
+  background-color: $danger-color;
+}
+
+.alert-toast.info {
+  background-color: $primary-color;
+}

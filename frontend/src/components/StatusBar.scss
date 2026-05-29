@@ -1,0 +1,17 @@
+@import "../styles/variables";
+
+.status {
+  font-size: 20px;
+  
+  &.running {
+    color: $success-color;
+  }
+
+  &.stopped {
+    color: $danger-color;
+  }
+
+  &.unknown {
+    color: $warning-color;
+  }
+}

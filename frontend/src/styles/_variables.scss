@@ -1,0 +1,20 @@
+// colors
+$primary-color: #58A6FF;
+$success-color: #10B981;
+$warning-color: #FFB74D;
+$danger-color: #CF6679;
+$text-color: #E0E0E0;
+$bg-color: #0D1117;
+$panel: #21262D;
+$select-hover: #334155;
+
+// breakpoints
+$breakpoint-lg: 1024px;
+$desktop: $breakpoint-lg;
+
+//mixins
+@mixin desktop {
+  @media (min-width: $desktop) {
+    @content;
+  }
+}

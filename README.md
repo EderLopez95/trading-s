@@ -1,0 +1,12 @@
+## Trading Signals
+
+API -> fastapi con MetaTrader5 como proveedor
+- backend folder
+
+UI -> react
+- frontend folder
+
+## Local
+- en cada folder esta otro README con pasos
+- cd backend -> ejecutar
+- cd frontend -> iniciar

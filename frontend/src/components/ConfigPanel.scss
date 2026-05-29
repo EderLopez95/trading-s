@@ -1,0 +1,176 @@
+@import "../styles/variables";
+
+.loading-warning {
+  margin-top: 30px;
+  color: $text-color;
+  font-size: 16px;
+}
+
+.config-panel {
+  background: $panel;
+  padding: 4px 20px 20px;
+  border-radius: 8px;
+  flex-grow: 1;
+
+  @include desktop {
+    max-width: 350px;
+  }
+
+  .field {
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
+
+    .error {
+      color: $danger-color;
+      font-size: 13px;
+      margin: 5px 0 0 3px;
+    }
+
+    label {
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    
+    input,
+    select {
+      padding: 8px 35px 8px 8px;
+      border: 1px solid $text-color;
+      border-radius: 8px;
+      background-color: $bg-color;
+      color: $text-color;
+    }
+
+    select {
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNFMUUwRTAiIHN0cm9rZS13aWR0aD0iMi41IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxwb2x5bGluZSBwb2ludHM9IjYgOSAxMiAxNSAxOCA5Ij48L3BvbHlsaW5lPjwvc3ZnPg==");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      background-size: 18px;
+    }
+
+    .symbol-select {
+      &__control {
+        background-color: $bg-color;
+        border: 1px solid $text-color;
+        border-radius: 8px;
+        min-height: 66px;
+        font-size: 14px;
+        cursor: pointer;
+      }
+      
+      &__control--is-focused {
+        box-shadow: none;
+      }
+
+      &__value-container {
+        padding: 0 8px;
+      }
+
+      &__value-container--has-value {
+        margin-bottom: 2px;
+      }
+
+      &__menu {
+        background-color: $bg-color;
+        border: 1px solid $text-color;
+        color: $text-color;
+        font-size: 14px;
+        z-index: 10;
+      }
+
+      &__option {
+        background-color: $bg-color;
+        color: $text-color;
+        cursor: pointer;
+      }
+
+      &__option--is-focused {
+        background-color: $select-hover;
+      }
+
+      &__single-value {
+        color: $text-color;
+      }
+
+      &__multi-value {
+        background-color: $select-hover;
+        border-radius: 4px;
+        color: $text-color;
+      }
+
+      &__multi-value__label {
+        color: $text-color;
+      }
+
+      &__multi-value__remove {
+        color: $text-color;
+
+        &:hover {
+          background-color: $danger-color;
+          color: $text-color;
+        }
+      }
+
+      &__input-container {
+        color: $text-color;
+      }
+
+      &__placeholder {
+        color: $text-color;
+      }
+
+      &__indicators {
+        max-height: 33px;
+      }
+
+      &__clear-indicator {
+        color: $text-color;
+        
+        &:hover {
+          color: $danger-color;
+        }
+      }
+
+      &__dropdown-indicator {
+        color: $text-color;
+        width: 30px;
+        height: 30px;
+        background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNFMUUwRTAiIHN0cm9rZS13aWR0aD0iMi41IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxwb2x5bGluZSBwb2ludHM9IjYgOSAxMiAxNSAxOCA5Ij48L3BvbHlsaW5lPjwvc3ZnPg==");
+        background-repeat: no-repeat;
+        background-position: right 10px center;
+        background-size: 18px;
+
+        svg {
+          display: none;
+        }
+      }
+
+      &__indicator-separator {
+        display: none;
+      }
+    }
+  }
+
+  .actions {
+    margin-top: 30px;
+
+    button {
+      width: 100%;
+      padding: 10px 40px;
+      background-color: $primary-color;
+      color: $text-color;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+  }
+}
