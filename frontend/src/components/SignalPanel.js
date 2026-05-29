@@ -28,6 +28,7 @@ function SignalPanel({ signals }) {
                             <th>Symbol</th>
                             <th>Option</th>
                             <th>Signal</th>
+                            <th>Trend</th>
                             <th>Price</th>
                             <th>Strategy</th>
                             <th>Time</th>
@@ -43,6 +44,7 @@ function SignalPanel({ signals }) {
                             <td className={`${signal.signal === SignalType.BUY ? "buy" : signal.signal === SignalType.SELL ? "sell" : "hold"}`}>
                                 {signal.signal}
                             </td>
+                            <td>{signal.temporality}</td>
                             <td>{signal.price}</td>
                             <td>
                                 {signal.strategy === StrategyType.MULTI_SMA ? StrategyType.MULTI_SMA_value
