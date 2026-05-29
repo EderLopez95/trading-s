@@ -21,6 +21,7 @@ class AnalyzeMarket:
             strategy = config.strategy,
             timestamp = datetime.now(timezone.utc).isoformat(),
             signal = signal,
+            temporality = config.timeframes.trend,
             price = data.entry["close"].iloc[-1], # get price from open candle
             logs = logs
         )

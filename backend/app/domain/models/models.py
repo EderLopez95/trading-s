@@ -16,6 +16,7 @@ class SignalResult(BaseModel):
     strategy: Optional[StrategyType]
     timestamp: str
     signal: Optional[SignalType]
+    temporality: Optional[Timeframe]
     price: Optional[float]
     logs: List[LogEntry] = []
 

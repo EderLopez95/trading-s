@@ -8,6 +8,8 @@
 - plyer==2.1.0
 - uvicorn[standard]==0.29.0
 - fastapi==0.110.0
+- requests
+- python-dotenv
 
 ## Inicializar
 - crear entorno virtual
@@ -19,7 +21,12 @@
 - ejecutar todos los .py en carpeta tests para verificar que funcione la conexion
 - python -m tests.test_data ...
 
+## Notificacion
+- crear bot en telegram (instrucciones en la web)
+- guardar TOKEN y chat_id del bot en .env.local
+
 # Servidor
+- tener abierto metatrader siempre
 - python -m uvicorn main:app --reload
 - :8000
 
