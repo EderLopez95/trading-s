@@ -6,6 +6,7 @@ from app.application.use_cases.analyze_market import AnalyzeMarket
 from app.infrastructure.ws.ws_manager import ws_manager
 from app.domain.enums.enums import LogType, SignalType
 from app.domain.models.models import LogWSMessage, SignalResult, LogEntry
+from app.infrastructure.notifications.telegram_notifier import TelegramNotifier
 from app.infrastructure.notifications.local_notifier import LocalNotifier
 
 class BotRunner:
@@ -14,7 +15,8 @@ class BotRunner:
         self.stop_event = threading.Event()
         self.provider = MT5Provider()
         self.analyzer = AnalyzeMarket(self.provider)
-        self.notifier = LocalNotifier()
+        self.telegram_notifier = TelegramNotifier()
+        self.local_notifier = LocalNotifier()
         self.last_signal_candle = {}
 
     def _send_signal(self, type, signal: SignalResult):
@@ -62,7 +64,8 @@ class BotRunner:
                                 if last_candle == candle_time:
                                     continue
                                 self.last_signal_candle[symbol] = candle_time
-                                self.notifier.send(result.signal, result.price, symbol)
+                                self.telegram_notifier.send(result.signal, result.price, symbol, result.temporality)
+                                self.local_notifier.send(result.signal, result.price, symbol)
                                 self._send_signal(SignalType.SIGNAL.value, result)
                         except Exception as e:
                             self._send_ws(LogEntry(

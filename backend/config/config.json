@@ -4,18 +4,15 @@
         "AAL",
         "AMD",
         "AMZN",
-        "BAC",
-        "COST",
         "F",
-        "INTC",
         "META",
         "NVDA",
         "SOFI"
     ],
     "strategy": "rsi_cross_trend",
     "timeframes": {
-        "trend": "M15",
-        "entry": "M5"
+        "trend": "H1",
+        "entry": "M15"
     },
     "execution_interval": 60
 }
