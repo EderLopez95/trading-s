@@ -10,6 +10,10 @@ class RSICrossTrendStrategy:
         # data from provider
         df_trend = data.trend
 
+        # minimum data points to calculate RSI and its moving average
+        if len(df_trend) < 50:
+            return SignalType.HOLD.value
+
         # calculate RSI
         rsi = self.utils.calculate_rsi(df_trend["close"], 14)
         rsi_ma = rsi.rolling(14).mean()
