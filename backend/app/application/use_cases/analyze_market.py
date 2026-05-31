@@ -12,7 +12,7 @@ class AnalyzeMarket:
         # fetch market data from provider for specific symbol and timeframes defined in config
         data = MarketData(
             trend = self.provider.get_data(symbol, config.timeframes.trend),
-            entry = self.provider.get_data(symbol, config.timeframes.entry)
+            entry = self.provider.get_data(symbol, config.timeframes.entry, 50) # minimum data required
         )
         signal, logs = self.engine.run(config.strategy, data)
 
