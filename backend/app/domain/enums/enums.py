@@ -1,8 +1,8 @@
 from enum import Enum
 
 class StrategyType(str, Enum):
-    MULTI_SMA = "multi_sma"
     RSI_CROSS_TREND = "rsi_cross_trend"
+    MULTI_SMA = "multi_sma"
 
 class SignalType(str, Enum):
     SIGNAL = "SIGNAL"
@@ -17,10 +17,6 @@ class LogType(str, Enum):
 class BotStatus(str, Enum):
     RUNNING = "RUNNING"
     STOPPED = "STOPPED"
-
-class ProviderType(str, Enum):
-    MT5 = "MT5"
-    TRADINGVIEW = "TV"
 
 class Timeframe(str, Enum):
     M5 = "M5"

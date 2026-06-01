@@ -1,17 +1,35 @@
 {
-    "symbols": [
-        "AAL",
-        "AMD",
-        "AMZN",
-        "F",
-        "META",
-        "NVDA",
-        "SOFI"
-    ],
-    "strategy": "rsi_cross_trend",
-    "timeframes": {
-        "trend": "H1",
-        "entry": "M15"
-    },
-    "execution_interval": 60
+    "execution_interval": 60,
+    "configurations": [
+        {
+            "id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+            "enabled": true,
+            "symbols": [
+                "AAL",
+                "F"
+            ],
+            "strategies": [
+                "rsi_cross_trend"
+            ],
+            "timeframes": {
+                "trend": "H1",
+                "entry": "M15"
+            }
+        },
+        {
+            "id": "f47ac10b-58cc-4373-a567-0e02b2c3d479",
+            "enabled": true,
+            "symbols": [
+                "BAC",
+                "SOFI"
+            ],
+            "strategies": [
+                "multi_sma"
+            ],
+            "timeframes": {
+                "trend": "H1",
+                "entry": "M15"
+            }
+        }
+    ]
 }
