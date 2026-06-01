@@ -7,7 +7,7 @@ from app.domain.exceptions import DomainError, ConfigNotFoundError
 
 app = FastAPI()
 
-frontend_url = os.getenv("FRONTEND_URL") or "http://localhost:3000"
+frontend_url = os.getenv("FRONTEND_URL") or "http://localhost:3001"
 origins = [frontend_url]
 
 app.add_middleware(
