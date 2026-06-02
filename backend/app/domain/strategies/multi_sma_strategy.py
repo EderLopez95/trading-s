@@ -14,7 +14,7 @@ class MultiSMAStrategy:
 
         # minimum data to validate trend and entry
         if len(df_trend) < 200 or len(df_entry) < 30:
-            return SignalType.HOLD.value
+            return SignalType.HOLD
 
         # calculate SMAs (averages, last volume)
         sma20 = df_trend["close"].rolling(20).mean()
@@ -27,7 +27,7 @@ class MultiSMAStrategy:
         sma200_v = sma200.iloc[-1]
 
         if pd.isna(sma200_v): # in case of invalid data
-            return SignalType.HOLD.value
+            return SignalType.HOLD
 
         # determine trend based on SMA order
         bullish_trend = (
@@ -48,15 +48,15 @@ class MultiSMAStrategy:
         # calculate tick volume (price changes not market volume, considerate for other providers)
         volume_avg = df_entry["tick_volume"].rolling(20).mean()
         if pd.isna(volume_avg.iloc[-1]): # in case of invalid data
-            return SignalType.HOLD.value
+            return SignalType.HOLD
         volume_v = df_entry["tick_volume"].iloc[-1]
         volume_avg_v = volume_avg.iloc[-1] # last tick volume
         volume_ok = volume_v > (volume_avg_v * 1.2) # considerable movement, increase it to filter more deeply
 
         if bullish_trend and bullish_cross and volume_ok:
-            return SignalType.BUY.value
+            return SignalType.BUY
 
         if bearish_trend and bearish_cross and volume_ok:
-            return SignalType.SELL.value
+            return SignalType.SELL
 
-        return SignalType.HOLD.value
+        return SignalType.HOLD

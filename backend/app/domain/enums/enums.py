@@ -5,7 +5,6 @@ class StrategyType(str, Enum):
     MULTI_SMA = "multi_sma"
 
 class SignalType(str, Enum):
-    SIGNAL = "SIGNAL"
     BUY = "BUY"
     SELL = "SELL"
     HOLD = "HOLD"

@@ -12,7 +12,7 @@ class RSICrossTrendStrategy:
 
         # minimum data points to calculate RSI and its moving average
         if len(df_trend) < 50:
-            return SignalType.HOLD.value
+            return SignalType.HOLD
 
         # calculate RSI
         rsi = self.utils.calculate_rsi(df_trend["close"], 14)
@@ -21,9 +21,9 @@ class RSICrossTrendStrategy:
         bearish_cross = self.utils.crossunder(rsi, rsi_ma)
 
         if bullish_cross:
-            return SignalType.BUY.value
+            return SignalType.BUY
 
         if bearish_cross:
-            return SignalType.SELL.value
+            return SignalType.SELL
 
-        return SignalType.HOLD.value
+        return SignalType.HOLD

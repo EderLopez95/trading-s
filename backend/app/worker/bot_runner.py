@@ -2,10 +2,10 @@ from datetime import datetime, timezone
 import threading
 from app.infrastructure.config.config_loader import load_config
 from app.infrastructure.data_provider.mt5_provider import MT5Provider
-from app.application.use_cases.analyze_market import AnalyzeMarket
+from app.domain.services.strategy_engine import StrategyEngine
 from app.infrastructure.ws.ws_manager import ws_manager
 from app.domain.enums.enums import LogType, SignalType
-from app.domain.models.models import LogWSMessage, SignalResult, LogEntry
+from app.domain.models.models import SignalResult, LogEntry, MarketData
 from app.infrastructure.notifications.telegram_notifier import TelegramNotifier
 from app.infrastructure.notifications.local_notifier import LocalNotifier
 
@@ -14,7 +14,7 @@ class BotRunner:
         self.running = False
         self.stop_event = threading.Event()
         self.provider = MT5Provider()
-        self.analyzer = AnalyzeMarket(self.provider)
+        self.engine = StrategyEngine()
         self.telegram_notifier = TelegramNotifier()
         self.local_notifier = LocalNotifier()
         self.last_signal_candle = {}
@@ -22,11 +22,15 @@ class BotRunner:
     def _send_ws(self, message):
         ws_manager.send(message.model_dump())
 
-    def _send_signal(self, type, signal: SignalResult):
+    def _send_signal(self, signal, symbol, temporality, strategy, price=0):
         self._send_ws(
-            LogWSMessage(
-                type = type,
-                data = signal
+            SignalResult(
+                symbol = symbol,
+                strategy = strategy.value,
+                timestamp = datetime.now(timezone.utc).isoformat(),
+                signal = signal.value,
+                temporality = temporality.value,
+                price = round(price, 2)
             )
         )
 
@@ -38,7 +42,7 @@ class BotRunner:
             try:
                 config = load_config()
                 interval = max(30, config.execution_interval) # ensure minimum interval of 30 seconds to prevent overload
-                
+
                 for configuration in config.configurations:
                     symbols = configuration.symbols
 
@@ -49,27 +53,32 @@ class BotRunner:
                             timestamp = datetime.now(timezone.utc).isoformat()
                         ))
                     else:
-                        for symbol in config.symbols:
+                        for symbol in symbols:
+                            # fetch market data from provider for specific symbol and timeframes
+                            data = MarketData(
+                                trend = self.provider.get_data(symbol, configuration.timeframes.trend),
+                                entry = self.provider.get_data(symbol, configuration.timeframes.entry, 50) # minimum data required
+                            )
                             try:
-                                # get trend data
-                                # HERE
-                                df_trend = self.provider.get_data(symbol, config.timeframes.trend)
-                                # execute analysis and strategy
-                                result = self.analyzer.execute(symbol, config)
-                                # in case of logs or signals, send to ws and notifier
-                                if result.logs:
-                                    for log in result.logs:
-                                        self._send_ws(log)
-                                if result.signal != SignalType.HOLD.value:
-                                    # send signal only if it is a new candle to prevent duplicates
-                                    candle_time = df_trend.index[-1]
-                                    last_candle = self.last_signal_candle.get(symbol)
-                                    if last_candle == candle_time:
-                                        continue
-                                    self.last_signal_candle[symbol] = candle_time
-                                    self.telegram_notifier.send(result.signal, result.price, symbol, result.temporality)
-                                    self.local_notifier.send(result.signal, result.price, symbol)
-                                    self._send_signal(SignalType.SIGNAL.value, result)
+                                for strategy in configuration.strategies:
+                                    # execute analysis and strategy
+                                    signal, logs = self.engine.run(strategy, data)
+                                    # in case of logs or signals, send to ws and notifier
+                                    if logs:
+                                        for log in logs:
+                                            self._send_ws(log)
+                                    if signal != SignalType.HOLD:
+                                        # send signal only if it is a new candle to prevent duplicates
+                                        candle_time = data.trend.index[-1]
+                                        last_candle = self.last_signal_candle.get(symbol)
+                                        if last_candle == candle_time:
+                                            continue
+                                        self.last_signal_candle[symbol] = candle_time
+                                        price = data.entry["close"].iloc[-1]
+                                        # notifications
+                                        self.telegram_notifier.send(signal, symbol, configuration.timeframes.trend, price)
+                                        self.local_notifier.send(signal, symbol)
+                                        self._send_signal(signal, symbol, configuration.timeframes.trend, strategy, price)
                             except Exception as e:
                                 self._send_ws(LogEntry(
                                     level = LogType.ERROR.value,
