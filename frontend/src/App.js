@@ -5,7 +5,9 @@ import BotControl from "./components/BotControl";
 import ConfigPanel from "./components/ConfigPanel";
 import LogPanel from "./components/LogPanel";
 import SignalPanel from "./components/SignalPanel";
+import ConfigCards from "./components/ConfigCards";
 import { SignalType, LogType, BotStatus } from "./enums";
+import { getConfig } from "./services/api";
 
 export const AppContext = createContext();
 
@@ -16,6 +18,10 @@ function App() {
   const [logs, setLogs] = useState([]);
   const wsRef = useRef(null);
   const hasInitialized = useRef(false);
+  const [config, setConfig] = useState({
+    execution_interval: 30, // minimum interval
+    configurations: []
+  })
 
   const showToast = (type, message) => {
     const id = Date.now();
@@ -25,6 +31,21 @@ function App() {
       setAlerts(prev => prev.filter(alert => alert.id !== id));
     }, 10000);
   };
+
+  const loadConfig = async () => {
+    try {
+      const data = await getConfig();
+      setConfig({
+        ...data
+      });
+    } catch (error) {
+      console.error("Error loading config:", error);
+    }
+  };
+
+  useEffect(() => {
+    loadConfig();
+  }, []);
 
   useEffect(() => {
     const storedSignals = localStorage.getItem("signals");
@@ -70,9 +91,9 @@ function App() {
           const message = JSON.parse(event.data);
           
           // messages from backend
-          if (message.type === SignalType.SIGNAL) {
+          if (message.signal === SignalType.BUY || message.signal === SignalType.SELL) {
             setSignals(prev => {
-              const updated = [message.data, ...prev].slice(0, MAX_LOGS);
+              const updated = [message, ...prev].slice(0, MAX_LOGS);
               localStorage.setItem("signals", JSON.stringify(updated));
               return updated;
             });
@@ -80,9 +101,9 @@ function App() {
           
           if (message.level === LogType.ERROR || message.level === LogType.INFO) {
             setLogs(prev => {
-              const newLogs = [message, ...prev].slice(0, MAX_LOGS);
-              localStorage.setItem("logs", JSON.stringify(newLogs));
-              return newLogs;
+              const updated = [message, ...prev].slice(0, MAX_LOGS);
+              localStorage.setItem("logs", JSON.stringify(updated));
+              return updated;
             });
           }
         } catch (error) {
@@ -142,16 +163,18 @@ function App() {
   }, []);
 
   return (
-    <AppContext.Provider value={{ showToast, setStatus, setSignals, setLogs }}>
+    <AppContext.Provider value={{ showToast, setStatus, setSignals, setLogs, config, setConfig }}>
       <div className="container">
-        <h1>Trading S</h1>
-        <div>
-          <StatusBar status={status} />
-        </div>
         <div className="wrapper">
           <div>
-            <BotControl />
+            <div className="wrapper-bot">
+              <StatusBar status={status} />
+              <BotControl />
+            </div>
             <ConfigPanel />
+          </div>
+          <div>
+            <ConfigCards />
           </div>
           <div className="wrapper-tables">
             <SignalPanel signals={signals} />

@@ -76,7 +76,7 @@ class BotRunner:
                                         self.last_signal_candle[symbol] = candle_time
                                         price = data.entry["close"].iloc[-1]
                                         # notifications
-                                        self.telegram_notifier.send(signal, symbol, configuration.timeframes.trend, price)
+                                        self.telegram_notifier.send(signal, symbol, configuration.timeframes.trend, strategy, price)
                                         self.local_notifier.send(signal, symbol)
                                         self._send_signal(signal, symbol, configuration.timeframes.trend, strategy, price)
                             except Exception as e:

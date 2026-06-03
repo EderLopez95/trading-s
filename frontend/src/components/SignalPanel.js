@@ -26,9 +26,8 @@ function SignalPanel({ signals }) {
                     <thead>
                         <tr>
                             <th>Symbol</th>
-                            <th>Option</th>
                             <th>Signal</th>
-                            <th>Trend</th>
+                            <th>Temp</th>
                             <th>Price</th>
                             <th>Strategy</th>
                             <th>Time</th>
@@ -38,9 +37,6 @@ function SignalPanel({ signals }) {
                         {signals.map((signal, i) => (
                         <tr key={i}>
                             <td>{signal.symbol}</td>
-                            <td className={`${signal.signal === SignalType.BUY ? "buy" : signal.signal === SignalType.SELL ? "sell" : "hold"}`}>
-                                {signal.signal === SignalType.BUY ? SignalType.CALL : signal.signal === SignalType.SELL ? SignalType.PUT : SignalType.HOLD}
-                            </td>
                             <td className={`${signal.signal === SignalType.BUY ? "buy" : signal.signal === SignalType.SELL ? "sell" : "hold"}`}>
                                 {signal.signal}
                             </td>

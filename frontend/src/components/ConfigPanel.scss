@@ -8,9 +8,16 @@
 
 .config-panel {
   background: $panel;
-  padding: 4px 20px 20px;
+  padding: 20px;
   border-radius: 8px;
-  flex-grow: 1;
+  margin-bottom: 20px;
+
+  .config-title {
+    font-size: 20px;
+    color: $text-color;
+    font-weight: 700;
+    margin-bottom: 20px;
+  }
 
   @include desktop {
     max-width: 350px;
@@ -160,7 +167,7 @@
   }
 
   .actions {
-    margin-top: 30px;
+    margin-top: 20px;
 
     button {
       width: 100%;

@@ -6,11 +6,12 @@ class TelegramNotifier:
         self.token = settings.telegram_token
         self.chat_id = settings.telegram_chat_id
 
-    def send(self, signal, symbol, temporality, price=0):
+    def send(self, signal, symbol, temporality, strategy, price=0):
         message = (
             f"Stock: <b>{symbol}</b>\n"
             f"Signal: <b>{signal.value}</b>\n"
             f"Temp: <b>{temporality.value}</b>\n"
+            f"Strategy: <b>{strategy.value}</b>\n"
             f"Price: {price:.2f}"
         )
 

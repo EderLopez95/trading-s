@@ -2,7 +2,14 @@
 @import './layout';
 
 .container {
-  padding: 0 30px 30px;
+  margin: 30px;
+}
+
+.wrapper-bot {
+  background: $panel;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
 }
 
 .wrapper {
@@ -10,7 +17,6 @@
   flex-direction: column;
   gap: 20px;
   width: 100%;
-  margin-top: 20px;
   
   @include desktop {
     flex-direction: row;
@@ -20,7 +26,7 @@
   .wrapper-tables {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 20px;
     width: 100%;
   }
 }
