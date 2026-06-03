@@ -1,14 +1,20 @@
 {
+    "provider": "MT5",
     "symbols": [
         "AAL",
+        "AAPL",
         "AMD",
         "AMZN",
+        "BAC",
         "F",
+        "INTC",
         "META",
+        "MSFT",
+        "NFLX",
         "NVDA",
         "SOFI"
     ],
-    "strategy": "rsi_cross_trend",
+    "strategy": "multi_sma",
     "timeframes": {
         "trend": "H1",
         "entry": "M15"
