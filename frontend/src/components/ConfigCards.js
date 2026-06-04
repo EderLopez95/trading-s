@@ -1,42 +1,60 @@
 import { useContext } from "react";
 import { AppContext } from "../App";
 import "./ConfigCards.scss";
+import { StrategyType } from "../enums";
 
 function ConfigCards() {
-    const { config } = useContext(AppContext);
+    const { config, setSelectedConfig } = useContext(AppContext);
 
     return (
         <>
             {config.configurations.map(c => (
-                <div key={c.id} className="card">
+                <div key={c.id} className={`card ${!c.enabled ? 'disable' : ''}`}>
                     <div className="label">
                         Symbols
                     </div>
                     <div className="label-data">
-                        {c.symbols.join(", ")}
+                        <ul>
+                            {c.symbols.map((symbol, index) => (
+                                <li key={index}>{symbol}</li>
+                            ))}
+                        </ul>
                     </div>
                     <div className="label">
                         Strategies
                     </div>
                     <div className="label-data">
-                        {c.strategies.join(", ")}
+                        <ul>
+                            {c.strategies.map((strategy, index) => (
+                                <li key={index}>
+                                    {
+                                        strategy === StrategyType.MULTI_SMA ? StrategyType.MULTI_SMA_value
+                                        : strategy === StrategyType.RSI_CROSS_TREND ? StrategyType.RSI_CROSS_TREND_value
+                                        : "Unknown"
+                                    }
+                                </li>
+                            ))}
+                        </ul>
                     </div>
                     <div className="label">
-                        Temp
+                        Temporalities
                     </div>
                     <div className="label-data">
-                        {c.timeframes.trend} / {c.timeframes.entry}
+                        <ul>
+                            <li>Trend: {c.timeframes.trend}</li>
+                            <li>Entry: {c.timeframes.entry}</li>
+                        </ul>
                     </div>
                     <div className="label">
-                        {c.enabled && <button>✅</button>}
-                        <button
-                            // onClick={() => handleEdit(c)}
-                        >✏️
-                        </button>
-                        <button
-                            // onClick={() => handleDelete(c.id)}
-                        >🗑
-                        </button>
+                        <div className="controls">
+                            <button className="delete"
+                                // onClick={() => handleDelete(c.id)}
+                            >
+                            </button>
+                            <button className="edit" onClick={() => setSelectedConfig(c)}>
+                            </button>
+                            <button className={c.enabled ? "enable" : "disable"}></button>
+                        </div>
                     </div>
                 </div>
             ))}

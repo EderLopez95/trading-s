@@ -22,6 +22,7 @@ function App() {
     execution_interval: 30, // minimum interval
     configurations: []
   })
+  const [selectedConfig, setSelectedConfig] = useState(null);
 
   const showToast = (type, message) => {
     const id = Date.now();
@@ -163,19 +164,30 @@ function App() {
   }, []);
 
   return (
-    <AppContext.Provider value={{ showToast, setStatus, setSignals, setLogs, config, setConfig }}>
+    <AppContext.Provider value={{ 
+      showToast,
+      setStatus,
+      setSignals,
+      setLogs,
+      config,
+      setConfig,
+      selectedConfig,
+      setSelectedConfig
+    }}>
       <div className="container">
         <div className="wrapper">
-          <div>
+          <div className="wrapper-config">
             <div className="wrapper-bot">
               <StatusBar status={status} />
               <BotControl />
             </div>
             <ConfigPanel />
           </div>
-          <div>
-            <ConfigCards />
-          </div>
+          {config.configurations && (
+            <div className="wrapper-config">
+              <ConfigCards />
+            </div>
+          )}
           <div className="wrapper-tables">
             <SignalPanel signals={signals} />
             {logs.length > 0 && <LogPanel logs={logs} />}

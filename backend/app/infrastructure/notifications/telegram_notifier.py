@@ -1,10 +1,12 @@
 import requests
 from app.infrastructure.config.settings import settings
+from datetime import datetime, timezone
 
 class TelegramNotifier:
     def __init__(self):
         self.token = settings.telegram_token
         self.chat_id = settings.telegram_chat_id
+        self.now = datetime.now(timezone.utc)
 
     def send(self, signal, symbol, temporality, strategy, price=0):
         message = (
@@ -12,7 +14,8 @@ class TelegramNotifier:
             f"Signal: <b>{signal.value}</b>\n"
             f"Temp: <b>{temporality.value}</b>\n"
             f"Strategy: <b>{strategy.value}</b>\n"
-            f"Price: {price:.2f}"
+            f"Price: {price:.2f}\n"
+            f"Time: {int(self.now.strftime('%I'))}:{self.now.strftime('%M%p %d/%m/%y')}"
         )
 
         url = f"https://api.telegram.org/bot{self.token}/sendMessage"

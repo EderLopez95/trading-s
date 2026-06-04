@@ -3,7 +3,7 @@
     "configurations": [
         {
             "id": "a1b2c3d4",
-            "enabled": true,
+            "enabled": false,
             "symbols": [
                 "AAL",
                 "F"

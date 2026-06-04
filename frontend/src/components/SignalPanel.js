@@ -47,7 +47,22 @@ function SignalPanel({ signals }) {
                                 : signal.strategy === StrategyType.RSI_CROSS_TREND ? StrategyType.RSI_CROSS_TREND_value
                                 : "Unknown"}
                             </td>
-                            <td>{new Date(signal.timestamp).toLocaleTimeString()}</td>
+                            <td>
+                                {(() => {
+                                    const date = new Date(signal.timestamp);
+                                    const timeStr = date.toLocaleTimeString('en-US', {
+                                        hour: 'numeric',
+                                        minute: '2-digit',
+                                        hour12: true
+                                    }).replace(' ', '');
+                                    const dateStr = date.toLocaleDateString('es-ES', {
+                                        day: '2-digit',
+                                        month: '2-digit',
+                                        year: '2-digit'
+                                    });
+                                    return `${timeStr} ${dateStr}`;
+                                })()}
+                            </td>
                         </tr>
                         ))}
                     </tbody>
