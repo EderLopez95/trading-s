@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from "react";
-import { getConfig, saveConfig, getSymbols } from "../services/api";
+import { saveConfig, getSymbols } from "../services/api";
 import "./ConfigPanel.scss";
 import AsyncSelect from "react-select/async";
 import { AppContext } from "../App";
@@ -13,7 +13,7 @@ function ConfigPanel() {
   useEffect(() => {
     if (config)
       setLoading(false);
-  }, []);
+  }, [config]);
 
   const loadSymbols = async (inputValue) => {
     try {
@@ -42,50 +42,36 @@ function ConfigPanel() {
     }));
   };
 
-  // const handleTimeframeChange = (type, value) => {
-  //   setConfig({
-  //     ...config,
-  //     timeframes: {
-  //       ...config.timeframes,
-  //       [type]: value
-  //     }
-  //   });
-  // };
+  const strategyOptions = [
+    { value: StrategyType.MULTI_SMA, label: StrategyType.MULTI_SMA_value },
+    { value: StrategyType.RSI_CROSS_TREND, label: StrategyType.RSI_CROSS_TREND_value }
+  ];
 
   const validateConfig = () => {
     const newErrors = {};
 
-    const symbolsArray =
-      typeof config.symbols === "string"
-        ? config.symbols.split(",").filter(s => s.trim() !== "")
-        : config.symbols;
-
-    if (!symbolsArray || symbolsArray.length === 0) {
+    if (!selectedConfig?.symbols || selectedConfig.symbols.length === 0) {
       newErrors.symbols = "At least one symbol is required";
     }
 
-    if (!config.strategy) {
-      newErrors.strategy = "Select a strategy";
+    if (!selectedConfig?.strategies || selectedConfig.strategies.length === 0) {
+      newErrors.strategies = "Select at least one strategy";
     }
 
-    if (!config.timeframes?.trend) {
+    if (!selectedConfig?.timeframes?.trend) {
       newErrors.trend = "Trend timeframe required";
     }
 
-    if (!config.timeframes?.entry) {
+    if (!selectedConfig?.timeframes?.entry) {
       newErrors.entry = "Entry timeframe required";
     }
 
     if (
-      config.timeframes?.trend &&
-      config.timeframes?.entry &&
-      config.timeframes.trend === config.timeframes.entry
+      selectedConfig?.timeframes?.trend &&
+      selectedConfig?.timeframes?.entry &&
+      selectedConfig.timeframes.trend === selectedConfig.timeframes.entry
     ) {
-      newErrors.entry = "Trend and Entry timeframes must be different";
-    }
-
-    if (!config.execution_interval || config.execution_interval < 10) {
-      newErrors.execution_interval = "Execution interval must be greater or equal to 10";
+      newErrors.entry = "Trend and Entry must be different";
     }
 
     setErrors(newErrors);
@@ -93,6 +79,11 @@ function ConfigPanel() {
   };
 
   const handleSaveConfig = async () => {
+    if (!selectedConfig) {
+      showToast("error", "No entry data to save");
+      return;
+    }
+
     if (!validateConfig()) {
       showToast("error", "Fix form errors before saving");
       return;
@@ -113,7 +104,10 @@ function ConfigPanel() {
           {
             ...selectedConfig,
             id: crypto.randomUUID().slice(0, 8),
-            enabled: true
+            enabled: true,
+            symbols: selectedConfig.symbols || [],
+            strategies: selectedConfig.strategies || [],
+            timeframes: selectedConfig.timeframes || { trend: "", entry: "" }
           }
         ];
       }
@@ -126,7 +120,7 @@ function ConfigPanel() {
       const response = await saveConfig(newConfig);
 
       if (response.success) {
-        showToast("info", "Config saved successfully");
+        showToast("info", "Configuration saved successfully");
         setConfig(newConfig);
         setSelectedConfig(null);
       } else {
@@ -194,70 +188,45 @@ function ConfigPanel() {
               isSearchable
               closeMenuOnSelect={false}
               defaultOptions={false}
-              loadOptions={loadSymbols}            
+              value={parseSymbols(selectedConfig?.symbols)}
+              loadOptions={loadSymbols}
               onChange={(selected) => {
-                const symbols = selected?.map(s => s.value) || [];
-                setSelectedConfig({ ...selectedConfig, symbols });
+                const unique = [...new Set((selected || []).map(s => s.value))].sort();
+                setSelectedConfig({ ...selectedConfig, symbols: unique });
               }}
-              // value={parseSymbols(config.symbols)}
-              // onChange={(selected) => {
-              //   if (!selected) {
-              //     setConfig({ ...config, symbols: "" });
-              //     return;
-              //   }
-              //   const unique = [...new Set(selected.map((s) => s.value))].sort();
-              //   const symbolsString = unique.join(", ");
-              //   setConfig({
-              //     ...config,
-              //     symbols: symbolsString
-              //   });
-              // }}
               placeholder="Select symbols..."
               classNamePrefix={"symbol-select"}
             />
-            {/* {errors.symbols && <span className="error">{errors.symbols}</span>} */}
+            {errors.symbols && <span className="error">{errors.symbols}</span>}
         </div>
         <div className="field">
-          <label>Strategy:</label>
+          <label>Strategies:</label>
           <AsyncSelect
               isMulti
               closeMenuOnSelect={false}
-              defaultOptions={false}
-              loadOptions={loadSymbols}            
+              defaultOptions={strategyOptions}
+              value={strategyOptions.filter(opt =>
+                selectedConfig?.strategies?.includes(opt.value)
+              )}
               onChange={(selected) => {
-                const symbols = selected?.map(s => s.value) || [];
-                setSelectedConfig({ ...selectedConfig, symbols });
+                const strategies = selected?.map(s => s.value) || [];
+                setSelectedConfig({ ...selectedConfig, strategies });
               }}
               placeholder="Select strategies..."
               classNamePrefix={"symbol-select"}
             />
-          {/* <select
-            // value={config.strategy}
-            // onChange={(e) =>
-            //   setConfig({
-            //     ...config,
-            //     strategy: e.target.value
-            //   })
-            // }
-          >
-            <option value={StrategyType.MULTI_SMA}>{StrategyType.MULTI_SMA_value}</option>
-            <option value={StrategyType.RSI_CROSS_TREND}>{StrategyType.RSI_CROSS_TREND_value}</option>
-          </select> */}
-          {/* {errors.strategy && <span className="error">{errors.strategy}</span>} */}
+          {errors.strategies && <span className="error">{errors.strategies}</span>}
         </div>
         <div className="field">
           <label>Timeframe Trend:</label>
-          <select          
+          <select
+            value={selectedConfig?.timeframes?.trend || ""}
             onChange={(e) =>
               setSelectedConfig({
                 ...selectedConfig,
                 timeframes: { ...selectedConfig.timeframes, trend: e.target.value }
               })
             }
-            // value={config.timeframes.trend}
-            // onChange={(e) =>
-            //   handleTimeframeChange("trend", e.target.value)
-            // }
           >
             <option value="M5">M5</option>
             <option value="M15">M15</option>
@@ -266,21 +235,18 @@ function ConfigPanel() {
             <option value="D1">D1</option>
             <option value="W1">W1</option>
           </select>
-          {/* {errors.trend && <span className="error">{errors.trend}</span>} */}
+          {errors.trend && <span className="error">{errors.trend}</span>}
         </div>
         <div className="field">
           <label>Timeframe Entry:</label>
-          <select          
+          <select
+            value={selectedConfig?.timeframes?.entry || ""}
             onChange={(e) =>
               setSelectedConfig({
                 ...selectedConfig,
                 timeframes: { ...selectedConfig.timeframes, entry: e.target.value }
               })
             }
-            // value={config.timeframes.entry}
-            // onChange={(e) =>
-            //   handleTimeframeChange("entry", e.target.value)
-            // }
           >
             <option value="M5">M5</option>
             <option value="M15">M15</option>
@@ -289,7 +255,7 @@ function ConfigPanel() {
             <option value="D1">D1</option>
             <option value="W1">W1</option>
           </select>
-          {/* {errors.entry && <span className="error">{errors.entry}</span>} */}
+          {errors.entry && <span className="error">{errors.entry}</span>}
         </div>
         <div className="actions">
           <button onClick={handleSaveConfig}>

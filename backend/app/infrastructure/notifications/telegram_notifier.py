@@ -1,19 +1,28 @@
 import requests
 from app.infrastructure.config.settings import settings
-from datetime import datetime, timezone
+from datetime import datetime
+from app.domain.enums.enums import StrategyNameType, StrategyType
 
 class TelegramNotifier:
     def __init__(self):
         self.token = settings.telegram_token
         self.chat_id = settings.telegram_chat_id
-        self.now = datetime.now(timezone.utc)
+        self.now = datetime.now().astimezone()
 
     def send(self, signal, symbol, temporality, strategy, price=0):
+        match strategy:
+            case StrategyType.RSI_CROSS_TREND:
+                strategy_text = StrategyNameType.RSI_CROSS_TREND_value.value
+            case StrategyType.MULTI_SMA:
+                strategy_text = StrategyNameType.MULTI_SMA_value.value
+            case _:
+                strategy_text = strategy.value
+
         message = (
             f"Stock: <b>{symbol}</b>\n"
             f"Signal: <b>{signal.value}</b>\n"
             f"Temp: <b>{temporality.value}</b>\n"
-            f"Strategy: <b>{strategy.value}</b>\n"
+            f"Strategy: <b>{strategy_text}</b>\n"
             f"Price: {price:.2f}\n"
             f"Time: {int(self.now.strftime('%I'))}:{self.now.strftime('%M%p %d/%m/%y')}"
         )

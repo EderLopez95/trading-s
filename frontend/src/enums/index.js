@@ -7,8 +7,7 @@ export const StrategyType = {
 
 export const SignalType = {
     BUY: "BUY",
-    SELL: "SELL",
-    HOLD: "HOLD"
+    SELL: "SELL"
 };
 
 export const LogType = {

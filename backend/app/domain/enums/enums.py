@@ -4,6 +4,10 @@ class StrategyType(str, Enum):
     RSI_CROSS_TREND = "rsi_cross_trend"
     MULTI_SMA = "multi_sma"
 
+class StrategyNameType(str, Enum):
+    RSI_CROSS_TREND_value = "RSI 14 Cross Trend"
+    MULTI_SMA_value = "Multi SMA (20,40,100,200) + Cross RSI 14 + Tick Volume"
+
 class SignalType(str, Enum):
     BUY = "BUY"
     SELL = "SELL"

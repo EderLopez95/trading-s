@@ -2,9 +2,40 @@ import { useContext } from "react";
 import { AppContext } from "../App";
 import "./ConfigCards.scss";
 import { StrategyType } from "../enums";
+import { saveConfig } from "../services/api";
 
 function ConfigCards() {
-    const { config, setSelectedConfig } = useContext(AppContext);
+    const { config, setConfig, setSelectedConfig, showToast } = useContext(AppContext);
+
+    const updateDeleteConfig = async (getUpdatedConfigs, successMessage) => {
+        const newConfig = {
+            ...config,
+            configurations: getUpdatedConfigs(config.configurations)
+        };
+        const response = await saveConfig(newConfig);
+        
+        if (response.success) {
+            showToast("info", successMessage);
+            setConfig(newConfig);
+        } else {
+            const msg = response.errors?.[0]?.msg || "Invalid data";
+            showToast("error", msg);
+        }
+    };
+
+    const handleDelete = (id) => {
+        updateDeleteConfig(
+            (configs) => configs.filter(c => c.id !== id),
+            "Configuration deleted"
+        );
+    };
+
+    const handleToggle = (id) => {
+        updateDeleteConfig(
+            (configs) => configs.map(c => c.id === id ? { ...c, enabled: !c.enabled } : c),
+            "Configuration status updated"
+        );
+    };
 
     return (
         <>
@@ -47,13 +78,9 @@ function ConfigCards() {
                     </div>
                     <div className="label">
                         <div className="controls">
-                            <button className="delete"
-                                // onClick={() => handleDelete(c.id)}
-                            >
-                            </button>
-                            <button className="edit" onClick={() => setSelectedConfig(c)}>
-                            </button>
-                            <button className={c.enabled ? "enable" : "disable"}></button>
+                            <button className="delete" onClick={() => handleDelete(c.id)}></button>
+                            <button className="edit" onClick={() => setSelectedConfig(c)}></button>
+                            <button className={c.enabled ? "enable" : "disable"} onClick={() => handleToggle(c.id)}></button>
                         </div>
                     </div>
                 </div>

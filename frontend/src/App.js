@@ -135,6 +135,7 @@ function App() {
         
         if (ready) {
           connectWebSocket();
+          
           if (ready.status === BotStatus.RUNNING) {
             setStatus(BotStatus.RUNNING);
           } else if (ready.status === BotStatus.STOPPED) {
@@ -183,7 +184,7 @@ function App() {
             </div>
             <ConfigPanel />
           </div>
-          {config.configurations && (
+          {config.configurations?.length > 0 && (
             <div className="wrapper-config">
               <ConfigCards />
             </div>

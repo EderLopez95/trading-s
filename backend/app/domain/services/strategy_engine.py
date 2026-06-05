@@ -30,9 +30,11 @@ class StrategyEngine:
 
         try:
             signal = strat.execute(data)
+
             if signal not in [SignalType.BUY, SignalType.SELL, SignalType.HOLD]:
                 self._add_log(logs, LogType.INFO.value, f"Invalid signal '{signal}', defaulting to HOLD")
                 return SignalType.HOLD, logs
+            
             return signal, logs
         except Exception as e:
             self._add_log(logs, LogType.ERROR.value, f"Error executing strategy '{strategy.value}': {e}")

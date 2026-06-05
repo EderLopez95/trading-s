@@ -16,7 +16,7 @@ class MultiSMAStrategy:
         if len(df_trend) < 200 or len(df_entry) < 30:
             return SignalType.HOLD
 
-        # calculate SMAs (averages, last volume)
+        # calculate SMAs (averages, last value)
         sma20 = df_trend["close"].rolling(20).mean()
         sma40 = df_trend["close"].rolling(40).mean()
         sma100 = df_trend["close"].rolling(100).mean()

@@ -41,10 +41,11 @@ class BotRunner:
         while self.running:
             try:
                 config = load_config()
+                active_configs = [c for c in config.configurations if c.enabled]
                 interval = max(30, config.execution_interval) # ensure minimum interval of 30 seconds to prevent overload
 
-                if config and len(config) > 0:
-                    for configuration in config.configurations:
+                if active_configs and len(active_configs) > 0:
+                    for configuration in active_configs:
                         symbols = configuration.symbols
 
                         if len(symbols) == 0:
@@ -64,22 +65,28 @@ class BotRunner:
                                     for strategy in configuration.strategies:
                                         # execute analysis and strategy
                                         signal, logs = self.engine.run(strategy, data)
+                                        
                                         # in case of logs or signals, send to ws and notifier
                                         if logs:
                                             for log in logs:
                                                 self._send_ws(log)
+                                        
                                         if signal != SignalType.HOLD:
                                             # send signal only if it is a new candle to prevent duplicates
                                             candle_time = data.trend.index[-1]
                                             last_candle = self.last_signal_candle.get(symbol)
+                                            
                                             if last_candle == candle_time:
                                                 continue
+                                            
                                             self.last_signal_candle[symbol] = candle_time
                                             price = data.entry["close"].iloc[-1]
+                                            
                                             # notifications
                                             self.telegram_notifier.send(signal, symbol, configuration.timeframes.trend, strategy, price)
                                             self.local_notifier.send(signal, symbol)
                                             self._send_signal(signal, symbol, configuration.timeframes.trend, strategy, price)
+
                                 except Exception as e:
                                     self._send_ws(LogEntry(
                                         level = LogType.ERROR.value,
@@ -95,6 +102,7 @@ class BotRunner:
 
                 if self.stop_event.wait(timeout=interval):
                     break
+                
             except Exception as e:
                 self._send_ws(LogEntry(
                     level = LogType.ERROR.value,
