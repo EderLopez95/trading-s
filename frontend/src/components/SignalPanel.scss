@@ -11,6 +11,7 @@
         font-size: 16px;
         cursor: pointer;
         background-color: $primary-color;
+        width: auto;
     }
 }
 
@@ -26,11 +27,11 @@
         height: 200px;
         max-height: 200px;
 
-        .signals-table th:nth-child(1),
-        .signals-table th:nth-child(2) {
+        .signals-table th:nth-child(1) {
             width: 17%;
         }
 
+        .signals-table th:nth-child(2),
         .signals-table th:nth-child(3) {
             width: max-content;
         }
@@ -60,11 +61,7 @@
 .signals-table th:nth-child(2),
 .signals-table th:nth-child(3),
 .signals-table th:nth-child(4) {
-    width: 17%;
-
-    @include desktop {
-        width: 13%;
-    }
+    width: 13%;
 }
 
 .signals-table tbody tr td:first-child {

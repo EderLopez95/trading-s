@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List, Any, Optional
+from typing import Any, Optional
 from app.domain.enums.enums import StrategyType, SignalType, Timeframe
 
 class Timeframes(BaseModel):
@@ -18,12 +18,7 @@ class SignalResult(BaseModel):
     signal: Optional[SignalType]
     temporality: Optional[Timeframe]
     price: Optional[float]
-    logs: List[LogEntry] = []
 
 class MarketData(BaseModel):
     trend: Any
     entry: Any
-
-class LogWSMessage(BaseModel):
-    type: str
-    data: SignalResult

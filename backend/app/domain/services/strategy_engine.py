@@ -8,10 +8,10 @@ class StrategyEngine:
     def __init__(self):
         # add strategies from strategies folder, they must implement an execute method that returns a signal
         self.strategies = {
-            StrategyType.MULTI_SMA.value: MultiSMAStrategy(),
-            StrategyType.RSI_CROSS_TREND.value: RSICrossTrendStrategy()
+            StrategyType.MULTI_SMA: MultiSMAStrategy(),
+            StrategyType.RSI_CROSS_TREND: RSICrossTrendStrategy()
         }
-        self.default_strategy = StrategyType.MULTI_SMA.value
+        self.default_strategy = StrategyType.MULTI_SMA
 
     def _add_log(self, logs, level, message):
         logs.append(LogEntry(
@@ -20,20 +20,22 @@ class StrategyEngine:
             timestamp = datetime.now(timezone.utc).isoformat()
         ))
 
-    def run(self, strategy_name, data):
-        strategy = self.strategies.get(strategy_name)
+    def run(self, strategy, data):
+        strat = self.strategies.get(strategy)
         logs = []
-        
-        if strategy is None:
-            self._add_log(logs, LogType.INFO.value, f"Strategy '{strategy_name}' not found. Using default '{self.default_strategy}'")
-            strategy = self.strategies[self.default_strategy]
+
+        if strat is None:
+            self._add_log(logs, LogType.INFO.value, f"Strategy '{strategy.value}' not found. Using default '{self.default_strategy.value}'")
+            strat = self.strategies[self.default_strategy]
 
         try:
-            signal = strategy.execute(data)
-            if signal not in [SignalType.BUY.value, SignalType.SELL.value, SignalType.HOLD.value]:
+            signal = strat.execute(data)
+
+            if signal not in [SignalType.BUY, SignalType.SELL, SignalType.HOLD]:
                 self._add_log(logs, LogType.INFO.value, f"Invalid signal '{signal}', defaulting to HOLD")
-                return SignalType.HOLD.value, logs
+                return SignalType.HOLD, logs
+            
             return signal, logs
         except Exception as e:
-            self._add_log(logs, LogType.ERROR.value, f"Error executing strategy '{strategy_name}': {e}")
-            return SignalType.HOLD.value, logs
+            self._add_log(logs, LogType.ERROR.value, f"Error executing strategy '{strategy.value}': {e}")
+            return SignalType.HOLD, logs

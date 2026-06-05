@@ -1,23 +1,37 @@
 {
-    "provider": "MT5",
-    "symbols": [
-        "AAL",
-        "AAPL",
-        "AMD",
-        "AMZN",
-        "BAC",
-        "F",
-        "INTC",
-        "META",
-        "MSFT",
-        "NFLX",
-        "NVDA",
-        "SOFI"
-    ],
-    "strategy": "multi_sma",
-    "timeframes": {
-        "trend": "H1",
-        "entry": "M15"
-    },
-    "execution_interval": 60
+    "execution_interval": 60,
+    "configurations": [
+        {
+            "id": "2223125e",
+            "enabled": true,
+            "symbols": [
+                "AAL",
+                "AAPL",
+                "AMD",
+                "AMZN",
+                "BAC",
+                "COST",
+                "F",
+                "GOOGL",
+                "INTC",
+                "JPM",
+                "META",
+                "MSFT",
+                "NFLX",
+                "NVDA",
+                "ORCL",
+                "QCOM",
+                "SOFI",
+                "TSLA"
+            ],
+            "strategies": [
+                "rsi_cross_trend",
+                "multi_sma"
+            ],
+            "timeframes": {
+                "trend": "H1",
+                "entry": "M15"
+            }
+        }
+    ]
 }

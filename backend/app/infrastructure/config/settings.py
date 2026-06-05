@@ -5,6 +5,7 @@ dotenv_loaded = False
 # load environment variables from .env file if available, otherwise rely on system environment variables
 try:
     from dotenv import load_dotenv
+    
     if os.path.exists(".env.local"):
         load_dotenv(".env.local")
         dotenv_loaded = True

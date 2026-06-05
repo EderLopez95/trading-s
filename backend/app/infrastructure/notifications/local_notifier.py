@@ -1,17 +1,12 @@
 from plyer import notification
 
 class LocalNotifier:
-    def send(self, signal, price, symbol):
+    def send(self, signal, symbol):
         if not signal:
             return
 
-        message = (
-            f"Signal: {signal.value}\n"
-            f"Price: {price:.2f}"
-        )
-
         notification.notify(
-            title=f"Trading Signal for: {symbol}",
-            message=message,
+            title=f"SIGNAL FOR: {symbol}",
+            message=f"{signal.value}",
             timeout=10
         )

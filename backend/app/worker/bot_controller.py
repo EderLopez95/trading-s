@@ -12,6 +12,7 @@ class BotController:
         try:
             if self.thread and self.thread.is_alive():
                 raise BotAlreadyRunningError("Bot is already running")
+            
             self.thread = threading.Thread(target=self.bot.start)
             self.thread.daemon = True
             self.thread.start()
@@ -23,6 +24,7 @@ class BotController:
         try:
             if not self.bot or not self.thread or not self.thread.is_alive():
                 raise BotNotRunningError("Bot is not running")
+            
             self.bot.stop()
             return BotStatus.STOPPED.value
         except Exception:

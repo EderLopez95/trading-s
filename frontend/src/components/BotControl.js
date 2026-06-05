@@ -10,6 +10,7 @@ function BotControl() {
   const handleStart = async () => {
     try {
       const response = await startBot();
+
       if (response.status === BotStatus.RUNNING) {
         setStatus(BotStatus.RUNNING);
         showToast("info", "Bot is running");
@@ -24,6 +25,7 @@ function BotControl() {
   const handleStop = async () => {
     try {
       const response = await stopBot();
+      
       if (response.status === BotStatus.STOPPED) {
         setStatus(BotStatus.STOPPED);
         showToast("info", "Bot is stopped");

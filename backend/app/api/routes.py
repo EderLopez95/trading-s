@@ -4,7 +4,7 @@ from fastapi import APIRouter, WebSocket
 from app.worker.bot_controller import BotController
 from app.infrastructure.config.config_loader import load_config, save_config
 from app.infrastructure.ws.ws_manager import ws_manager
-from app.domain.models.config_model import ConfigModel
+from app.domain.models.config_model import AppConfigModel
 
 router = APIRouter(prefix="/api")
 bot_controller = BotController()
@@ -34,7 +34,7 @@ def get_config():
     return load_config()
 
 @router.post("/config")
-def update_config(config: ConfigModel):
+def update_config(config: AppConfigModel):
     save_config(config)
     return {
         "success": True,

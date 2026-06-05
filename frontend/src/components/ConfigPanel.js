@@ -1,19 +1,19 @@
 import { useState, useEffect, useContext } from "react";
-import { getConfig, saveConfig, getSymbols } from "../services/api";
+import { saveConfig, getSymbols } from "../services/api";
 import "./ConfigPanel.scss";
 import AsyncSelect from "react-select/async";
 import { AppContext } from "../App";
 import { StrategyType } from "../enums";
 
 function ConfigPanel() {
-  const [config, setConfig] = useState(null);
   const [loading, setLoading] = useState(true);
   const [errors, setErrors] = useState({});
-  const { showToast } = useContext(AppContext);
+  const { showToast, config, setConfig, selectedConfig, setSelectedConfig } = useContext(AppContext);
 
   useEffect(() => {
-    loadConfig();
-  }, []);
+    if (config)
+      setLoading(false);
+  }, [config]);
 
   const loadSymbols = async (inputValue) => {
     try {
@@ -26,18 +26,6 @@ function ConfigPanel() {
       console.error("Error loading symbols:", error);
       return [];
     }
-  };
-
-  const loadConfig = async () => {
-    try {
-      const data = await getConfig();   
-      setConfig({
-        ...data
-      });
-    } catch (error) {
-      console.error("Error loading config:", error);
-    }
-    setLoading(false);
   };
 
   const parseSymbols = (symbols) => {
@@ -54,92 +42,132 @@ function ConfigPanel() {
     }));
   };
 
-  const handleTimeframeChange = (type, value) => {
-    setConfig({
-      ...config,
-      timeframes: {
-        ...config.timeframes,
-        [type]: value
-      }
-    });
-  };
+  const strategyOptions = [
+    { value: StrategyType.MULTI_SMA, label: StrategyType.MULTI_SMA_value },
+    { value: StrategyType.RSI_CROSS_TREND, label: StrategyType.RSI_CROSS_TREND_value }
+  ];
 
   const validateConfig = () => {
     const newErrors = {};
 
-    const symbolsArray =
-      typeof config.symbols === "string"
-        ? config.symbols.split(",").filter(s => s.trim() !== "")
-        : config.symbols;
-
-    if (!symbolsArray || symbolsArray.length === 0) {
+    if (!selectedConfig?.symbols || selectedConfig.symbols.length === 0) {
       newErrors.symbols = "At least one symbol is required";
     }
 
-    if (!config.strategy) {
-      newErrors.strategy = "Select a strategy";
+    if (!selectedConfig?.strategies || selectedConfig.strategies.length === 0) {
+      newErrors.strategies = "Select at least one strategy";
     }
 
-    if (!config.timeframes?.trend) {
+    if (!selectedConfig?.timeframes?.trend) {
       newErrors.trend = "Trend timeframe required";
     }
 
-    if (!config.timeframes?.entry) {
+    if (!selectedConfig?.timeframes?.entry) {
       newErrors.entry = "Entry timeframe required";
     }
 
     if (
-      config.timeframes?.trend &&
-      config.timeframes?.entry &&
-      config.timeframes.trend === config.timeframes.entry
+      selectedConfig?.timeframes?.trend &&
+      selectedConfig?.timeframes?.entry &&
+      selectedConfig.timeframes.trend === selectedConfig.timeframes.entry
     ) {
-      newErrors.entry = "Trend and Entry timeframes must be different";
-    }
-
-    if (!config.execution_interval || config.execution_interval < 10) {
-      newErrors.execution_interval = "Execution interval must be greater or equal to 10";
+      newErrors.entry = "Trend and Entry must be different";
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSave = async () => {
+  const handleSaveConfig = async () => {
+    if (!selectedConfig) {
+      showToast("error", "No entry data to save");
+      return;
+    }
+
     if (!validateConfig()) {
       showToast("error", "Fix form errors before saving");
       return;
     }
 
     try {
-      let symbolsArray = [];
+      let updatedConfigs;
 
-      if (typeof config.symbols === "string") {
-        symbolsArray = config.symbols
-          .split(",")
-          .map(s => s.trim())
-          .filter(s => s !== "");
+      if (selectedConfig.id) {
+        // update
+        updatedConfigs = config.configurations.map(c =>
+          c.id === selectedConfig.id ? selectedConfig : c
+        );
       } else {
-        symbolsArray = config.symbols;
+        // create
+        updatedConfigs = [
+          ...config.configurations,
+          {
+            ...selectedConfig,
+            id: crypto.randomUUID().slice(0, 8),
+            enabled: true,
+            symbols: selectedConfig.symbols || [],
+            strategies: selectedConfig.strategies || [],
+            timeframes: selectedConfig.timeframes || { trend: "", entry: "" }
+          }
+        ];
       }
-
-      const updatedConfig = {
+  
+      const newConfig = {
         ...config,
-        symbols: symbolsArray
+        configurations: updatedConfigs
       };
 
-      const response = await saveConfig(updatedConfig);
+      const response = await saveConfig(newConfig);
 
       if (response.success) {
-        showToast("info", "Config saved successfully");
+        showToast("info", "Configuration saved successfully");
+        setConfig(newConfig);
+        setSelectedConfig(null);
       } else {
         const msg = response.errors?.[0]?.msg || "Invalid config";
         showToast("error", msg);
       }
-
-      setConfig(updatedConfig);
     } catch (error) {
       console.error("Error saving configuration:", error);
       showToast("error", "Error saving configuration");
+    }
+  };
+
+  const validateConfigInterval = () => {
+    const newErrors = {};
+    
+    if (!config.execution_interval || config.execution_interval < 30) {
+      newErrors.execution_interval = "Execution interval must be greater or equal to 30";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSaveInterval = async () => {
+    if (!validateConfigInterval()) {
+      showToast("error", "Fix form errors before saving");
+      return;
+    }
+
+    try {    
+      const newConfig = {
+        ...config,
+        execution_interval: config.execution_interval
+      };
+      
+      const response = await saveConfig(newConfig);
+
+      if (response.success) {
+        showToast("info", "Interval saved successfully");
+        setConfig(newConfig);
+      } else {
+        const msg = response.errors?.[0]?.msg || "Invalid interval";
+        showToast("error", msg);
+      }
+    } catch (error) {
+      console.error("Error saving interval:", error);
+      showToast("error", "Error saving interval");
     }
   };
 
@@ -147,108 +175,122 @@ function ConfigPanel() {
   if (!config) return <div className="loading-warning">Error loading configuration</div>;
 
   return (
-    <div className="config-panel">
-      <h3>Bot Configuration</h3>
-      <div className="field">
-        <label>Symbols:</label>
-        <AsyncSelect
-            isMulti
-            cacheOptions
-            isSearchable
-            closeMenuOnSelect={false}
-            defaultOptions={false}
-            loadOptions={loadSymbols}
-            value={parseSymbols(config.symbols)}
-            onChange={(selected) => {
-              if (!selected) {
-                setConfig({ ...config, symbols: "" });
-                return;
-              }
-              const unique = [...new Set(selected.map((s) => s.value))].sort();
-              const symbolsString = unique.join(", ");
+    <>
+      <div className="config-panel">
+        <div className="config-title">
+          Add or update configuration
+        </div>
+        <div className="field">
+          <label>Symbols:</label>
+          <AsyncSelect
+              isMulti
+              cacheOptions
+              isSearchable
+              closeMenuOnSelect={false}
+              defaultOptions={false}
+              value={parseSymbols(selectedConfig?.symbols)}
+              loadOptions={loadSymbols}
+              onChange={(selected) => {
+                const unique = [...new Set((selected || []).map(s => s.value))].sort();
+                setSelectedConfig({ ...selectedConfig, symbols: unique });
+              }}
+              placeholder="Select symbols..."
+              classNamePrefix={"symbol-select"}
+            />
+            {errors.symbols && <span className="error">{errors.symbols}</span>}
+        </div>
+        <div className="field">
+          <label>Strategies:</label>
+          <AsyncSelect
+              isMulti
+              closeMenuOnSelect={false}
+              defaultOptions={strategyOptions}
+              value={strategyOptions.filter(opt =>
+                selectedConfig?.strategies?.includes(opt.value)
+              )}
+              onChange={(selected) => {
+                const strategies = selected?.map(s => s.value) || [];
+                setSelectedConfig({ ...selectedConfig, strategies });
+              }}
+              placeholder="Select strategies..."
+              classNamePrefix={"symbol-select"}
+            />
+          {errors.strategies && <span className="error">{errors.strategies}</span>}
+        </div>
+        <div className="field">
+          <label>Timeframe Trend:</label>
+          <select
+            value={selectedConfig?.timeframes?.trend || ""}
+            onChange={(e) =>
+              setSelectedConfig({
+                ...selectedConfig,
+                timeframes: { ...selectedConfig.timeframes, trend: e.target.value }
+              })
+            }
+          >
+            <option value="M5">M5</option>
+            <option value="M15">M15</option>
+            <option value="H1">H1</option>
+            <option value="H4">H4</option>
+            <option value="D1">D1</option>
+            <option value="W1">W1</option>
+          </select>
+          {errors.trend && <span className="error">{errors.trend}</span>}
+        </div>
+        <div className="field">
+          <label>Timeframe Entry:</label>
+          <select
+            value={selectedConfig?.timeframes?.entry || ""}
+            onChange={(e) =>
+              setSelectedConfig({
+                ...selectedConfig,
+                timeframes: { ...selectedConfig.timeframes, entry: e.target.value }
+              })
+            }
+          >
+            <option value="M5">M5</option>
+            <option value="M15">M15</option>
+            <option value="H1">H1</option>
+            <option value="H4">H4</option>
+            <option value="D1">D1</option>
+            <option value="W1">W1</option>
+          </select>
+          {errors.entry && <span className="error">{errors.entry}</span>}
+        </div>
+        <div className="actions">
+          <button onClick={handleSaveConfig}>
+            Save
+          </button>
+        </div>
+      </div>
+      <div className="config-panel">
+        <div className="config-title">
+          Update interval
+        </div>
+        <div className="field">
+          <label>Execution interval (seconds):</label>
+          <input
+            type="number"
+            min={30}
+            value={config.execution_interval || ""}
+            onChange={(e) => {
               setConfig({
                 ...config,
-                symbols: symbolsString
+                execution_interval: parseInt(e.target.value) || 0
               });
             }}
-            placeholder="Select symbols..."
-            classNamePrefix={"symbol-select"}
           />
-          {errors.symbols && <span className="error">{errors.symbols}</span>}
+          {errors.execution_interval && (
+            <span className="error">{errors.execution_interval}</span>
+          )}
+        </div>
+        <div className="actions">
+          <button onClick={handleSaveInterval}>
+            Save
+          </button>
+        </div>
       </div>
-      <div className="field">
-        <label>Strategy:</label>
-        <select
-          value={config.strategy}
-          onChange={(e) =>
-            setConfig({
-              ...config,
-              strategy: e.target.value
-            })
-          }
-        >
-          <option value={StrategyType.MULTI_SMA}>{StrategyType.MULTI_SMA_value}</option>
-          <option value={StrategyType.RSI_CROSS_TREND}>{StrategyType.RSI_CROSS_TREND_value}</option>
-        </select>
-        {errors.strategy && <span className="error">{errors.strategy}</span>}
-      </div>
-      <div className="field">
-        <label>Timeframe Trend:</label>
-        <select
-          value={config.timeframes.trend}
-          onChange={(e) =>
-            handleTimeframeChange("trend", e.target.value)
-          }
-        >
-          <option value="M5">M5</option>
-          <option value="M15">M15</option>
-          <option value="H1">H1</option>
-          <option value="H4">H4</option>
-          <option value="D1">D1</option>
-          <option value="W1">W1</option>
-        </select>
-        {errors.trend && <span className="error">{errors.trend}</span>}
-      </div>
-      <div className="field">
-        <label>Timeframe Entry:</label>
-        <select
-          value={config.timeframes.entry}
-          onChange={(e) =>
-            handleTimeframeChange("entry", e.target.value)
-          }
-        >
-          <option value="M5">M5</option>
-          <option value="M15">M15</option>
-          <option value="H1">H1</option>
-          <option value="H4">H4</option>
-          <option value="D1">D1</option>
-          <option value="W1">W1</option>
-        </select>
-        {errors.entry && <span className="error">{errors.entry}</span>}
-      </div>
-      <div className="field">
-        <label>Execution interval (seconds):</label>
-        <input
-          type="number"
-          min={10}
-          value={config.execution_interval || ""}
-          onChange={(e) => {
-            setConfig({
-              ...config,
-              execution_interval: parseInt(e.target.value)
-            });
-          }}
-        />
-        {errors.execution_interval && (
-          <span className="error">{errors.execution_interval}</span>
-        )}
-      </div>
-      <div className="actions">
-        <button onClick={handleSave} disabled={!config}>
-          Save Changes
-        </button>
-      </div>
-    </div>
+    </>
   );
 }
 

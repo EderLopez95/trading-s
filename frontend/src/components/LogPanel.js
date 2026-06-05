@@ -15,7 +15,22 @@ function LogPanel({ logs }) {
                 {logs.map((log, i) => (
                 <tr key={i}>
                     <td>{log.level}</td>
-                    <td>{new Date(log.timestamp).toLocaleTimeString()}</td>
+                    <td>
+                        {(() => {
+                            const date = new Date(log.timestamp);
+                            const timeStr = date.toLocaleTimeString('en-US', {
+                                hour: 'numeric',
+                                minute: '2-digit',
+                                hour12: true
+                            }).replace(' ', '');
+                            const dateStr = date.toLocaleDateString('es-ES', {
+                                day: '2-digit',
+                                month: '2-digit',
+                                year: '2-digit'
+                            });
+                            return `${timeStr} ${dateStr}`;
+                        })()}
+                    </td>
                     <td>{log.message}</td>
                 </tr>
                 ))}

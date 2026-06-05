@@ -11,10 +11,9 @@ const request = async (endpoint, options = {}) => {
   });
   const data = await res.json();
   if (!res.ok) {
-    throw {
-      message: data.message || "Unknown error",
-      status: res.status
-    };
+    const error = new Error(data.message || "Unknown error");
+    error.status = res.status;
+    throw error;
   }
   return data;
 };

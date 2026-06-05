@@ -18,8 +18,10 @@ class MT5Provider:
     def get_data(self, symbol, timeframe, n=220):
         tf = self.TIMEFRAME_MAP[timeframe]
         rates = mt5.copy_rates_from_pos(symbol, tf, 0, n)
+
         if rates is None:
             raise Exception(f"No data for {symbol}")
+
         df = pd.DataFrame(rates)
         return df
 
